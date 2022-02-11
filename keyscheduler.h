@@ -1,1 +1,1 @@
-char* keyscheduler(unsigned char[16]);
+char* keyscheduler(unsigned char ikey[16]);
