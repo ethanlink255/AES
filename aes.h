@@ -1,4 +1,4 @@
 #include "keyscheduler.h"
 
-char* aes_blockcrypt(unsigned char block[16] , unsigned char key[16]);
-char* aes_addkey(char* block, char* key);
+uint8_t* aes_blockcrypt(uint8_t block[16] , uint8_t key[16]);
+uint8_t* aes_addkey(uint8_t* block, uint8_t* key);

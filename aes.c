@@ -1,31 +1,46 @@
 #include "aes.h"
 #include "stdio.h"
 
-char* aes_addkey(char* block, char* key){
-    char* resultant = malloc(16);
+uint8_t* aes_addkey(uint8_t* block, uint8_t* key){
+    uint8_t* resultant = malloc(16);
     for(int i = 0; i < 16; i++){
         resultant[i] = block[i] ^ key[i];
+        printf("\n Round %i: Block %x, Key %x, Result %x", i, block[i], key[i], resultant[i]);
     }
 
     return resultant;
 }
 
-char* aes_blockcrypt(unsigned char block[16], unsigned char key[16]){
-    char* iv = aes_addkey(block, key);
-    
-    u_int8_t* subkeys = keyscheduler(key);
+uint8_t* aes_blockcrypt(uint8_t block[16], uint8_t* subkeys){
+    uint8_t* iv = malloc(16);
+    printf("First Block:\n");
 
     for(int i = 0; i < 16; i++){
-        printf("%i\n", (int)iv[i]);
+        printf("%x ", block[i]);
     }
 
-    for(int r = 1; r < 11; r++){
-        
+    iv = aes_addkey(block, subkeys);
+
+    printf("\nBlock post addkey:\n");
+    for(int i = 0; i < 16; i++){
+        printf("%x ", iv[i]);
+    }
+    
+    for(int r = 1; r < 11; r++){ 
         uint32_t w[4];
         for(int i = 0; i < 4; i++){    
             w[i] = subbytes(bytemerge(iv[i * 4], iv[i * 4 + 1], iv[i * 4 + 2], iv[i * 4 + 3]));
+           
+            printf("\nBlock post SubBytes Round %i:\n", i);
+            for(int i = 0; i < 4; i++){
+                printf("%x ", w[i]);
+            }
             //ShiftRows
-            w[i] = (w[i] << (i + 1) * 8) | (w[i] >> 32 - (i + 1) * 8);
+            w[i] = (w[i] << (i * 8)) | (w[i] >> (32 - i * 8));
+            printf("\nBlock post Shift Rows Round %i:\n", i);
+            for(int i = 0; i < 4; i++){
+                printf("%x ", w[i]);
+            }
             //Mix Cols
             uint8_t wordBytes[4];
             uint8_t transWordBytes[4];
@@ -40,18 +55,22 @@ char* aes_blockcrypt(unsigned char block[16], unsigned char key[16]){
         iv = aes_addkey(w, (subkeys + 16 * r));   
 
     }
-    //aes_rounds(iv, )
+
+    return iv;
 }
 
-
-
-
 int main(){
-    unsigned char block[16];
-    unsigned char key[16];
+    uint8_t block[16];
+    uint8_t key[16];
     for (int i = 0; i < 16; i++){
-        block[i] = 'h';
-        key[i]= 'c';
+        block[i] = 0x11;
+        key[i]= 0x22;
     }
-    aes_blockcrypt(block, key);
+    
+    u_int8_t* subkeys = keyscheduler(key);
+    uint8_t* result = aes_blockcrypt(block, subkeys);
+
+    for(int i = 0; i < 16; i++){
+        printf("%x\n", result[i]);
+    }
 } 
