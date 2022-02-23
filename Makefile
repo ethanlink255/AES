@@ -1,3 +1,4 @@
-aes.o: aes.c aes.h
-	rm *.gch
-	gcc aes.*
+aes: *.c
+	gcc -Wall aes.c keyscheduler.c math/GF28.c -o aes
+clean:
+	rm aes
